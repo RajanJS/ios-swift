@@ -362,7 +362,6 @@ extension GameSceneViewController {
     
     //================================================
     func calculateHighestScore(score: Int){
-        print("\(#function) - \(gameManager.firstHighestScore)")
         if(score >= 1){
             if(score > gameManager.firstHighestScore){
                 gameManager.thirdHighestScore = gameManager.secondHighestScore
