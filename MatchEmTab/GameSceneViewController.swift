@@ -8,6 +8,13 @@
 import UIKit
 
 class GameSceneViewController: UIViewController {
+    enum GameState {
+        case gameRunning
+        case gamePaused
+        case noGame
+    }
+    
+    var gameManager = GameManager()
     
     // MARK: - ==== Config Properties ====
     //================================================
@@ -16,17 +23,20 @@ class GameSceneViewController: UIViewController {
     private let rectSizeMax:CGFloat = 150.0
     
     // Random transparency on or off
-    private var randomAlpha = true
+    var randomAlpha = true
     
     // Rectangle creation interval
-    private var newRectPairInterval: TimeInterval = 1.5
+    var newRectPairInterval: TimeInterval = 1.5
+    let newRectIntervalMin: TimeInterval = 0.5
+    let newRectIntervalMax: TimeInterval = 5.0
     
     // Game duration
     private var gameDuration: TimeInterval = 12
     
     // How long for the rectangle to fade away
-    private var fadeDuration: TimeInterval = 0.8
-    
+    var fadeDuration: TimeInterval = 0.8
+    let newfadeDurMin: TimeInterval = 0.5
+    let newfadeDurMax: TimeInterval = 1.5
     
     // MARK: - ==== Internal Properties ====
     
@@ -45,14 +55,14 @@ class GameSceneViewController: UIViewController {
     // Game timer
     private var gameTimer: Timer?
     
+    // Game status
+    private var gameState = GameState.noGame
+    
     // Counters, property observers used
     private var rectanglePairsCreated: Int = 0 {
         didSet { gameInfoLabel?.text = gameInfo } }
     private var rectanglePairsTouched: Int = 0 {
         didSet { gameInfoLabel?.text = gameInfo } }
-    
-    // A game is in progress
-    private var gameInProgress = false
     
     private var gameInfo: String {
         let labelText = String(format: "| Time: %2.1f  |  Pairs: %2d  |  Matches%2d |",
@@ -75,12 +85,10 @@ class GameSceneViewController: UIViewController {
     // MARK: - ==== View Controller Methods ====
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-    }
-    
-    //================================================
-    override var prefersStatusBarHidden: Bool {
-        return true
+        // Do any additional setup after loading the view
+        
+        // Create a single rectangle
+        //resumeGameRunning()
     }
     
     //================================================
@@ -88,14 +96,38 @@ class GameSceneViewController: UIViewController {
         // Don't forget the call to super in these methods
         super.viewWillAppear(animated)
         
-        // Create a single rectangle
-        startGameRunning()
+        // Do nothing if there isn't a game in progress
+        if gameState == .noGame {
+            return
+        }
+        
+        resumeGameRunning()
+    }
+    
+    //================================================
+    override func viewWillDisappear(_ animated: Bool) {
+        // Don't forget the call to super in these methods
+        super.viewWillDisappear(animated)
+        
+        // Do nothing if there isn't a game in progress
+        if gameState == .noGame {
+            return
+        }
+        
+        // Pause
+        pauseGameRunning()
+    }
+    
+    
+    //================================================
+    override var prefersStatusBarHidden: Bool {
+        return true
     }
     
     //================================================
     @objc private func handleTouch(sender: UIButton) {
         
-        if !gameInProgress{
+        if gameState == .gamePaused || gameState == .noGame {
             return
         }
         
@@ -116,7 +148,9 @@ class GameSceneViewController: UIViewController {
             if(
                 (rectanglePairsDic[firstTouch!] === secondTouch) || (rectanglePairsDic[secondTouch!] === firstTouch)
             ){
-                rectanglePairsTouched = rectanglePairsTouched + 1
+                rectanglePairsTouched += 1
+                calculateHighestScore(score: rectanglePairsTouched)
+
                 // Remove the rectangle
                 removeRectangle(rectangle: firstTouch!)
                 removeRectangle(rectangle: secondTouch!)
@@ -126,18 +160,38 @@ class GameSceneViewController: UIViewController {
                 secondTouch = nil
             }else{
                 // ====== Doesn't Match:=======
-
+                
                 // Remove all the hightlight
                 sender.setTitle("", for: .normal)
                 firstTouch?.setTitle("", for: .normal)
                 secondTouch?.setTitle("", for: .normal)
-
+                
                 // Reset the touch states
                 firstTouch = nil
                 secondTouch = nil
             }
         }
     }
+    
+    @IBAction func pauseOrResumeOrNewGame(_ sender: UITapGestureRecognizer) {
+        // Only start a new game if no game is going on
+        if gameState == .noGame {
+            // Start a new game
+            startNewGame()
+            
+            // Done here
+            return
+        }
+        
+        // If here there is a game in progress
+        if gameState == .gameRunning {
+            pauseGameRunning()
+        }
+        else {
+            resumeGameRunning()
+        }
+    }
+    
 }
 
 // MARK: - ==== Rectangle Methods ====
@@ -185,7 +239,7 @@ extension GameSceneViewController {
         let recKey = createRectangle(randSize: rSize, randLoc: rLKey, randColor: rColor);
         let recValue = createRectangle(randSize: rSize, randLoc: rLValue, randColor:rColor );
         
-        rectanglePairsCreated = rectanglePairsCreated + 1
+        rectanglePairsCreated += 1
         
         rectanglePairsDic[recKey] = recValue;
         
@@ -208,66 +262,114 @@ extension GameSceneViewController {
     //================================================
     func removeSavedRectangles() {
         // Remove all rectangles from superview
-         for (rectangle1, rectangle2) in rectanglePairsDic {
-            removeRectangle(rectangle: rectangle1)
-            removeRectangle(rectangle: rectangle2)
-         }
+        for (keyRec, valueRec) in rectanglePairsDic {
+            keyRec.removeFromSuperview()
+            valueRec.removeFromSuperview()
+        }
         
         // Clear the rectangles array
-         rectanglePairsDic.removeAll()
+        rectanglePairsDic.removeAll()
     }
     
 }
 
 // MARK: - ==== Timer Functions ====
 extension GameSceneViewController {
+    
     //================================================
-    private func startGameRunning()
+    private func resumeGameRunning()
     {
         
-        // Init label colors
-        gameInfoLabel.textColor = .black
-        gameInfoLabel.backgroundColor = .clear
+        // Indicate that the game is now running
+        gameState = .gameRunning
+        
+        // Set the label
+        gameInfoLabel.text = gameInfo
         gameStatusLabel?.text = ""
         
-        //
-        removeSavedRectangles()
         
-        // Timer to produce the rectangles
+        // Timer to produce the pairs
         newRectPairTimer = Timer.scheduledTimer(withTimeInterval: newRectPairInterval,
                                                 repeats: true)
             { _ in self.createRectanglePairs() }
         
-        // Timer to end the game
-        gameTimer = Timer.scheduledTimer(withTimeInterval: gameDuration,
+        // Timer to end the game, resume with the remaining time
+        gameTimer = Timer.scheduledTimer(withTimeInterval: gameTimeRemaining,
                                          repeats: false)
-            { _ in self.stopGameRunning() }
-        
-        // Update the game status to progress
-        gameInProgress = true
+            { _ in self.gameOver() }
         
     }
     
     //================================================
-    private func stopGameRunning() {
+    private func pauseGameRunning() {
         
-        // Stop the timer
-        if let timer = newRectPairTimer { timer.invalidate() }
+        // Indicate that the game is paused
+        gameState = .gamePaused
         
-        // Remove the reference to the timer object
-        self.newRectPairTimer = nil
+        // Set the label
+        gameInfoLabel.text = gameInfo
+        // gameStatusLabel?.text = gameStatus
+        gameStatusLabel?.text = "Game Paused"
+        gameStatusLabel.textColor = .gray
         
-        // Update the game status to stopped
-        gameInProgress = false
+        // Stop the timers
+        newRectPairTimer?.invalidate()
+        gameTimer?.invalidate()
         
-        // End of game, no time left, make sure label is updated
-        gameTimeRemaining = 0.0
-        gameInfoLabel?.text = gameInfo
-        gameStatusLabel?.text = gameStatus
-        
-        // Make the label stand out
-        gameInfoLabel.textColor = .red
-        gameInfoLabel.backgroundColor = .black
+        // Remove the reference to the timer objects
+        newRectPairTimer = nil
+        gameTimer    = nil
     }
     
+    //================================================
+    func gameOver() {
+        // Stop the action
+        pauseGameRunning()
+        
+        calculateHighestScore(score: rectanglePairsTouched)
+        
+        // No game in progress
+        gameState = .noGame
+        gameStatusLabel?.text = "Game Over!!!"
+        gameStatusLabel.textColor = .red
+        
+        // Indicate via the label the game is over
+        gameInfoLabel.textColor = .red
+        gameInfoLabel.backgroundColor = .black
+        
+    }
+    
+    //================================================
+    func startNewGame() {
+        // Clear the rectangles
+        removeSavedRectangles()
+        
+        // Reset the time remaining to the full game time
+        gameTimeRemaining = gameDuration
+        
+        // Reset the game stat vars
+        rectanglePairsCreated = 0
+        rectanglePairsTouched = 0
+        
+        // Adjust the label background
+        gameInfoLabel.backgroundColor = .clear
+        gameInfoLabel.textColor = .black
+        gameStatusLabel?.text = ""
+        
+        // Get the action going
+        resumeGameRunning()
+    }
+    
+    //================================================
+    func calculateHighestScore(score: Int){
+        if(score >= 1){
+            if(score > gameManager.firstHighestScore){
+                gameManager.firstHighestScore = score
+            }else if(score > gameManager.secondHighestScore){
+                gameManager.secondHighestScore = score
+            }else{
+                gameManager.thirdHighestScore = score
+            }
+        }
+    }
 }
