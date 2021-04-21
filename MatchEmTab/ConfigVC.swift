@@ -28,12 +28,13 @@ class ConfigVC: UIViewController {
         return String(format: "%.2f", speedSlider.value)
     }
     
+    
     var sliderValueFadeLabelMessage: String {
         return String(format: "%.2f", fadeDurationSlider.value)
     }
     
     // Reference to the game scene view controller
-    var gameSceneVC: GameSceneViewController?
+    var gameManager: GameManager!
     
     // Slider min and max
     let sliderMin: Float = 0.0
@@ -43,21 +44,20 @@ class ConfigVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Set up a reference to the game scene
-        gameSceneVC = self.tabBarController!.viewControllers![0] as? GameSceneViewController
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         // Set up the slider
-        let sliderValue = sliderGivenDelay(delay: gameSceneVC!.newRectPairInterval)
+        let sliderValue = sliderGivenDelay(delay: gameManager.newRectPairInterval)
         speedSlider.value = sliderValue
-        let sliderValueFade = sliderGivenFadeDelay(delay: gameSceneVC!.fadeDuration)
+        let sliderValueFade = sliderGivenFadeDelay(delay: gameManager.fadeDuration)
         fadeDurationSlider.value = sliderValueFade
         
-        firstHighestScoreValue.text = String(format: "%d", gameSceneVC?.gameManager.firstHighestScore as! CVarArg)
-        secondHighestScoreValue.text = String(format: "%d", gameSceneVC?.gameManager.secondHighestScore as! CVarArg)
-        thirdHighestScoreValue.text = String(format: "%d", gameSceneVC?.gameManager.thirdHighestScore as! CVarArg)
+        firstHighestScoreValue.text = String(format: "%d", gameManager.firstHighestScore )
+        secondHighestScoreValue.text = String(format: "%d", gameManager.secondHighestScore )
+        thirdHighestScoreValue.text = String(format: "%d", gameManager.thirdHighestScore)
         
     }
     
@@ -69,8 +69,8 @@ class ConfigVC: UIViewController {
         // Get the corresponding delay
         let delay = delayGivenSlider(sliderValue: sliderValue)
         
-        // UPDATE THE SPEED IN THE GameSceneVC object
-        gameSceneVC?.newRectPairInterval = delay
+        // UPDATE THE SPEED IN THE gameManager object
+        gameManager.newRectPairInterval = delay
         
         // Update the slider's value label
         speedValue.text = sliderValueLabelMessage
@@ -79,22 +79,22 @@ class ConfigVC: UIViewController {
     @IBAction func switchBackground(_ sender: UISwitch) {
         if (sender.isOn == true){
             switchBackground.text = "On"
-            gameSceneVC?.view.backgroundColor = .cyan
+            gameManager.isSwitchBackgorundOn = true
         }
         else{
             switchBackground.text = "Off"
-            gameSceneVC?.view.backgroundColor = .white
+            gameManager.isSwitchBackgorundOn = false
         }
     }
     
     @IBAction func switchRandomTrans(_ sender: UISwitch) {
         if (sender.isOn == true){
             switchRandomTrans.text = "On"
-            gameSceneVC?.randomAlpha = true
+            gameManager.randomAlpha = true
         }
         else{
             switchRandomTrans.text = "Off"
-            gameSceneVC?.randomAlpha = false
+            gameManager.randomAlpha = false
         }
     }
     
@@ -104,8 +104,8 @@ class ConfigVC: UIViewController {
         // Get the corresponding delay
         let delay = delayGivenFadeSlider(sliderValue: sliderValue)
         
-        // UPDATE THE SPEED IN THE GameSceneVC object
-        gameSceneVC?.fadeDuration = delay
+        // UPDATE THE SPEED IN THE gameManager object
+        gameManager.fadeDuration = delay
         
         // Update the slider's value label
         fadeDurationSliderValue.text = sliderValueFadeLabelMessage
@@ -114,8 +114,8 @@ class ConfigVC: UIViewController {
     //================================================
     func sliderGivenDelay(delay: TimeInterval) -> Float {
         // Get values from the game scene
-        let nrMin = Float(gameSceneVC!.newRectIntervalMin)
-        let nrMax = Float(gameSceneVC!.newRectIntervalMax)
+        let nrMin = Float(gameManager.newRectIntervalMin)
+        let nrMax = Float(gameManager.newRectIntervalMax)
         
         // The slope
         let m = (nrMax - nrMin) / (sliderMin - sliderMax )
@@ -133,8 +133,8 @@ class ConfigVC: UIViewController {
     //================================================
     func sliderGivenFadeDelay(delay: TimeInterval) -> Float {
         // Get values from the game scene
-        let nrMin = Float(gameSceneVC!.newfadeDurMin)
-        let nrMax = Float(gameSceneVC!.newfadeDurMax)
+        let nrMin = Float(gameManager.newfadeDurMin)
+        let nrMax = Float(gameManager.newfadeDurMax)
         
         // The slope
         let m = (nrMax - nrMin) / (sliderMin - sliderMax )
@@ -152,8 +152,8 @@ class ConfigVC: UIViewController {
     //================================================
     func delayGivenSlider(sliderValue: Float) -> TimeInterval {
         // Get values from the game scene
-        let nrMin = Float(gameSceneVC!.newRectIntervalMin)
-        let nrMax = Float(gameSceneVC!.newRectIntervalMax)
+        let nrMin = Float(gameManager.newRectIntervalMin)
+        let nrMax = Float(gameManager.newRectIntervalMax)
         
         // The slope
         let m = (nrMax - nrMin) / (sliderMin - sliderMax )
@@ -170,8 +170,8 @@ class ConfigVC: UIViewController {
     //================================================
     func delayGivenFadeSlider(sliderValue: Float) -> TimeInterval {
         // Get values from the game scene
-        let nrMin = Float(gameSceneVC!.newfadeDurMin)
-        let nrMax = Float(gameSceneVC!.newfadeDurMax)
+        let nrMin = Float(gameManager.newfadeDurMin)
+        let nrMax = Float(gameManager.newfadeDurMax)
         
         // The slope
         let m = (nrMax - nrMin) / (sliderMin - sliderMax )

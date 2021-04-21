@@ -22,21 +22,9 @@ class GameSceneViewController: UIViewController {
     private let rectSizeMin:CGFloat =  50.0
     private let rectSizeMax:CGFloat = 150.0
     
-    // Random transparency on or off
-    var randomAlpha = true
+   
     
-    // Rectangle creation interval
-    var newRectPairInterval: TimeInterval = 1.5
-    let newRectIntervalMin: TimeInterval = 0.5
-    let newRectIntervalMax: TimeInterval = 5.0
-    
-    // Game duration
-    private var gameDuration: TimeInterval = 12
-    
-    // How long for the rectangle to fade away
-    var fadeDuration: TimeInterval = 0.8
-    let newfadeDurMin: TimeInterval = 0.5
-    let newfadeDurMax: TimeInterval = 1.5
+  
     
     // MARK: - ==== Internal Properties ====
     
@@ -76,7 +64,7 @@ class GameSceneViewController: UIViewController {
     }
     
     // Init the time remaining
-    private lazy var  gameTimeRemaining = gameDuration {
+    private lazy var  gameTimeRemaining = gameManager.gameDuration {
         didSet {
             gameInfoLabel?.text = gameInfo
         }
@@ -86,21 +74,22 @@ class GameSceneViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view
-        
+        self.tabBarController?.delegate = self
         // Create a single rectangle
-        //resumeGameRunning()
+        resumeGameRunning()
     }
     
     //================================================
     override func viewWillAppear(_ animated: Bool) {
         // Don't forget the call to super in these methods
         super.viewWillAppear(animated)
-        
+        view.backgroundColor = gameManager.isSwitchBackgorundOn ? .cyan : .white
         // Do nothing if there isn't a game in progress
         if gameState == .noGame {
             return
         }
         
+       
         resumeGameRunning()
     }
     
@@ -234,7 +223,7 @@ extension GameSceneViewController {
         let rSize     = Utility.getRandomSize(fromMin: rectSizeMin, throughMax: rectSizeMax)
         let rLKey = Utility.getRandomLocation(size: rSize, screenSize: view.bounds.size)
         let rLValue = Utility.getRandomLocation(size: rSize, screenSize: view.bounds.size)
-        let rColor = Utility.getRandomColor(randomAlpha: randomAlpha);
+        let rColor = Utility.getRandomColor(randomAlpha: gameManager.randomAlpha);
         
         let recKey = createRectangle(randSize: rSize, randLoc: rLKey, randColor: rColor);
         let recValue = createRectangle(randSize: rSize, randLoc: rLValue, randColor:rColor );
@@ -244,13 +233,13 @@ extension GameSceneViewController {
         rectanglePairsDic[recKey] = recValue;
         
         // Decrement the game time remaining
-        gameTimeRemaining -= newRectPairInterval
+        gameTimeRemaining -= gameManager.newRectPairInterval
     }
     
     //================================================
     func removeRectangle(rectangle: UIButton) {
         // Rectangle fade animation
-        let pa = UIViewPropertyAnimator(duration: fadeDuration,
+        let pa = UIViewPropertyAnimator(duration: gameManager.fadeDuration,
                                         curve: .linear,
                                         animations: nil)
         pa.addAnimations {
@@ -289,7 +278,7 @@ extension GameSceneViewController {
         
         
         // Timer to produce the pairs
-        newRectPairTimer = Timer.scheduledTimer(withTimeInterval: newRectPairInterval,
+        newRectPairTimer = Timer.scheduledTimer(withTimeInterval: gameManager.newRectPairInterval,
                                                 repeats: true)
             { _ in self.createRectanglePairs() }
         
@@ -345,7 +334,7 @@ extension GameSceneViewController {
         removeSavedRectangles()
         
         // Reset the time remaining to the full game time
-        gameTimeRemaining = gameDuration
+        gameTimeRemaining = gameManager.gameDuration
         
         // Reset the game stat vars
         rectanglePairsCreated = 0
@@ -374,5 +363,18 @@ extension GameSceneViewController {
                 gameManager.thirdHighestScore = score
             }
         }
+    }
+}
+
+
+extension GameSceneViewController: UITabBarControllerDelegate {
+    
+    func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
+        if viewController.isKind(of: ConfigVC.self as AnyClass) {
+            let viewController  = tabBarController.viewControllers?[1] as! ConfigVC
+            viewController.gameManager = self.gameManager
+        }
+        
+        return true
     }
 }
