@@ -23,9 +23,7 @@ class ConfigVC: UIViewController {
     @IBOutlet weak var secondHighestScoreValue: UILabel!
     
     @IBOutlet weak var thirdHighestScoreValue: UILabel!
-    
-    var gameManager = GameManager()
-    
+        
     var sliderValueLabelMessage: String {
         return String(format: "%.2f", speedSlider.value)
     }
@@ -57,9 +55,9 @@ class ConfigVC: UIViewController {
         let sliderValueFade = sliderGivenFadeDelay(delay: gameSceneVC!.fadeDuration)
         fadeDurationSlider.value = sliderValueFade
         
-        firstHighestScoreValue.text = String(format: "%d", gameManager.firstHighestScore)
-        secondHighestScoreValue.text = String(format: "%d", gameManager.secondHighestScore)
-        thirdHighestScoreValue.text = String(format: "%d", gameManager.thirdHighestScore)
+        firstHighestScoreValue.text = String(format: "%d", gameSceneVC?.gameManager.firstHighestScore as! CVarArg)
+        secondHighestScoreValue.text = String(format: "%d", gameSceneVC?.gameManager.secondHighestScore as! CVarArg)
+        thirdHighestScoreValue.text = String(format: "%d", gameSceneVC?.gameManager.thirdHighestScore as! CVarArg)
         
     }
     

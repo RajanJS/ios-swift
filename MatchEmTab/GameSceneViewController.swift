@@ -149,7 +149,7 @@ class GameSceneViewController: UIViewController {
                 (rectanglePairsDic[firstTouch!] === secondTouch) || (rectanglePairsDic[secondTouch!] === firstTouch)
             ){
                 rectanglePairsTouched += 1
-                calculateHighestScore(score: rectanglePairsTouched)
+                // calculateHighestScore(score: rectanglePairsTouched)
 
                 // Remove the rectangle
                 removeRectangle(rectangle: firstTouch!)
@@ -362,10 +362,14 @@ extension GameSceneViewController {
     
     //================================================
     func calculateHighestScore(score: Int){
+        print("\(#function) - \(gameManager.firstHighestScore)")
         if(score >= 1){
             if(score > gameManager.firstHighestScore){
+                gameManager.thirdHighestScore = gameManager.secondHighestScore
+                gameManager.secondHighestScore = gameManager.firstHighestScore
                 gameManager.firstHighestScore = score
             }else if(score > gameManager.secondHighestScore){
+                gameManager.thirdHighestScore = gameManager.secondHighestScore
                 gameManager.secondHighestScore = score
             }else{
                 gameManager.thirdHighestScore = score
