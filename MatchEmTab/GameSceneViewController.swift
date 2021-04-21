@@ -76,7 +76,7 @@ class GameSceneViewController: UIViewController {
         // Do any additional setup after loading the view
         self.tabBarController?.delegate = self
         // Create a single rectangle
-        resumeGameRunning()
+        // resumeGameRunning()
     }
     
     //================================================
@@ -354,13 +354,16 @@ extension GameSceneViewController {
         if(score >= 1){
             if(score > gameManager.firstHighestScore){
                 gameManager.thirdHighestScore = gameManager.secondHighestScore
-                gameManager.secondHighestScore = gameManager.firstHighestScore
                 gameManager.firstHighestScore = score
             }else if(score > gameManager.secondHighestScore){
-                gameManager.thirdHighestScore = gameManager.secondHighestScore
-                gameManager.secondHighestScore = score
+                if(score != gameManager.firstHighestScore ){
+                    gameManager.thirdHighestScore = gameManager.secondHighestScore
+                    gameManager.secondHighestScore = score
+                }
             }else{
-                gameManager.thirdHighestScore = score
+                if(score != gameManager.secondHighestScore ){
+                    gameManager.thirdHighestScore = score
+                }
             }
         }
     }

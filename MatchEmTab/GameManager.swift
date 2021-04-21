@@ -10,9 +10,11 @@ class GameManager {
     var firstHighestScore  = 0
     var secondHighestScore = 0
     var thirdHighestScore = 0
+    
     // Random transparency on or off
     var randomAlpha = true
     var isSwitchBackgorundOn: Bool = false
+    
     // Rectangle creation interval
     var newRectPairInterval: TimeInterval = 1.5
     let newRectIntervalMin: TimeInterval = 0.5
