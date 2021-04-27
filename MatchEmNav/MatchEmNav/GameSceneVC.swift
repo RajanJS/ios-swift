@@ -105,6 +105,11 @@ class GameSceneVC: UIViewController {
     }
     
   
+    // MARK: - ==== Navigation ====
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let dest = segue.destination as! ConfigVC
+        dest.gameManager = self.gameManager
+    }
     
     //================================================
     override var prefersStatusBarHidden: Bool {

@@ -13,7 +13,6 @@ class GameManager {
     var thirdHighestScore = 0
     
     // Random transparency on or off
-    var test = 1
     var randomAlpha = true
     var isSwitchBackgroundOn: Bool = false
     
