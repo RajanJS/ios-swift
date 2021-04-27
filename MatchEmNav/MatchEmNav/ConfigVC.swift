@@ -10,7 +10,9 @@ import UIKit
 class ConfigVC: UIViewController {
     @IBOutlet weak var speedSlider: UISlider!
     @IBOutlet weak var speedValue: UILabel!
+    @IBOutlet weak var bgUISwitch: UISwitch!
     
+    @IBOutlet weak var transparancyUISwitch: UISwitch!
     @IBOutlet weak var switchBackground: UILabel!
     @IBOutlet weak var switchRandomTrans: UILabel!
     
@@ -34,7 +36,7 @@ class ConfigVC: UIViewController {
     }
     
     // Reference to the game scene view controller
-    var gameManager: GameManager!
+    var gameManager: GameManager = GameManager.shared
     
     // Slider min and max
     let sliderMin: Float = 0.0
@@ -52,8 +54,16 @@ class ConfigVC: UIViewController {
         // Set up the slider
         let sliderValue = sliderGivenDelay(delay: gameManager.newRectPairInterval)
         speedSlider.value = sliderValue
+        speedValue.text = sliderValueLabelMessage
+       
         let sliderValueFade = sliderGivenFadeDelay(delay: gameManager.fadeDuration)
         fadeDurationSlider.value = sliderValueFade
+        
+        // Update the slider's value label
+        fadeDurationSliderValue.text = sliderValueFadeLabelMessage
+        
+        bgUISwitch.isOn = gameManager.isSwitchBackgroundOn
+        transparancyUISwitch.isOn = gameManager.randomAlpha
         
         firstHighestScoreValue.text = String(format: "%d", gameManager.firstHighestScore )
         secondHighestScoreValue.text = String(format: "%d", gameManager.secondHighestScore )

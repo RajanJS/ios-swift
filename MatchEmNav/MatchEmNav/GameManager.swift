@@ -7,11 +7,13 @@
 import Foundation
 
 class GameManager {
+    static let shared = GameManager()
     var firstHighestScore  = 0
     var secondHighestScore = 0
     var thirdHighestScore = 0
     
     // Random transparency on or off
+    var test = 1
     var randomAlpha = true
     var isSwitchBackgroundOn: Bool = false
     

@@ -11,7 +11,7 @@
         <!--Config-->
         <scene sceneID="sDc-tU-gpi">
             <objects>
-                <viewController id="fq4-sW-d1A" customClass="ConfigVC" customModule="MatchEmTab" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ConfigVC" id="fq4-sW-d1A" customClass="ConfigVC" customModule="MatchEmNav" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="fot-fQ-9No">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -149,6 +149,7 @@
                     <tabBarItem key="tabBarItem" title="Config" image="wrench.and.screwdriver.fill" catalog="system" id="PqW-Op-Kui"/>
                     <navigationItem key="navigationItem" id="ClT-FX-wdi"/>
                     <connections>
+                        <outlet property="bgUISwitch" destination="WHr-b6-da9" id="Zaz-Yc-qV9"/>
                         <outlet property="fadeDurationSlider" destination="m8I-Xb-nzg" id="w3Y-bs-j9S"/>
                         <outlet property="fadeDurationSliderValue" destination="i8N-sU-Tco" id="UkO-oa-RSG"/>
                         <outlet property="firstHighestScoreValue" destination="Nwy-jS-i83" id="eo3-cA-fsc"/>
@@ -158,6 +159,7 @@
                         <outlet property="switchBackground" destination="y2X-Xb-9BH" id="XWb-LJ-mRL"/>
                         <outlet property="switchRandomTrans" destination="Q3S-T2-dT7" id="ycq-je-cTS"/>
                         <outlet property="thirdHighestScoreValue" destination="hOK-Uu-UgY" id="OtD-mA-TyZ"/>
+                        <outlet property="transparancyUISwitch" destination="7vR-4R-zFl" id="i1F-Bg-3gN"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bPA-9z-Uqv" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -209,7 +211,7 @@
                 </tapGestureRecognizer>
                 <swipeGestureRecognizer direction="left" id="o0H-Vd-2Lh">
                     <connections>
-                        <segue destination="fq4-sW-d1A" kind="show" id="hnX-uA-i8C"/>
+                        <segue destination="fq4-sW-d1A" kind="show" identifier="configVC" id="hnX-uA-i8C"/>
                     </connections>
                 </swipeGestureRecognizer>
             </objects>
